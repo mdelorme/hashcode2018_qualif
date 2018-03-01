@@ -39,14 +39,17 @@ void print_solution() {
 }
 
 int time_when_ride_finished(Ride &r, int time_start, Point &car_pos,
-			    bool &on_time) {
+			    bool &on_time, int &waiting) {
   int time_to_start = time_start + car_pos.distance_to(r.start);
   if (time_to_start <= r.start_t) {
+    waiting = r.start_t - time_to_start;
     time_to_start = r.start_t;
     on_time = true;
   }
-  else
+  else {
     on_time = false;
+    waiting = 0;
+  }
 
   return time_to_start + r.time_to_drive;
 }
@@ -82,17 +85,15 @@ void naive() {
   for (int i=0; i < N; ++i) {
     Ride &r = rides[i];
     
-    // On trie les voitures
-    std::sort(car_pool.begin(), car_pool.end(), lambda_car);
-
     // Avec quelle voiture on peut obtenir un bonus ?
     bool valid, bonus;
-    int finish_time;
+    int finish_time, waiting;
 
-    int  best_time  = MAX_T;
-    int  best_car   = -1;
-    bool best_bonus = false;
-    bool best_valid = false;
+    int  best_time   = MAX_T;
+    int  best_car    = -1;
+    bool best_bonus  = false;
+    bool best_valid  = false;
+    int best_waiting = MAX_T;
     //std::cerr << "Ride : " << r.id << std::endl;
 
     // On verifie chaque voiture
@@ -101,16 +102,18 @@ void naive() {
       
       // En combien de temps on finit ?
       finish_time = time_when_ride_finished(r, c.time_available, c.pos,
-					    bonus);
+					    bonus, waiting);
 
       //std::cerr << " - Car " << c.id << " : " << finish_time
       //		<< " " << (bonus ? "on time" : "") << std::endl;
 
       // On garde le meilleur
-      if (finish_time < best_time) {
+      if (finish_time < best_time
+	  || (finish_time == best_time && waiting < best_waiting)) {
 	best_time  = finish_time;
 	best_car   = j;
 	best_bonus = bonus;
+	best_waiting = waiting;
       }
     }
 
