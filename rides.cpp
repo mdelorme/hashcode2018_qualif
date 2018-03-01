@@ -74,11 +74,6 @@ void naive() {
 		};
   std::sort(rides.begin(), rides.end(), lambda);
 
-  // Lambda pour trier les voitures
-  auto lambda_car = [&] (const Car &a, const Car &b) {
-		      return a.time_available < b.time_available;
-		    };
-
   int score = 0;
   
   // Maintenant on gere chaque ride en associant la prochaine voiture dispo
@@ -86,13 +81,12 @@ void naive() {
     Ride &r = rides[i];
     
     // Avec quelle voiture on peut obtenir un bonus ?
-    bool valid, bonus;
+    bool bonus;
     int finish_time, waiting;
 
     int  best_time   = MAX_T;
     int  best_car    = -1;
     bool best_bonus  = false;
-    bool best_valid  = false;
     int best_waiting = MAX_T;
     //std::cerr << "Ride : " << r.id << std::endl;
 
@@ -132,6 +126,7 @@ void naive() {
   std::cerr << "Final score : " << score << std::endl;
 
   print_solution();
+  std::cout << "Score " << score << std::endl;
 }
 
 int main(int argc, char **argv) {

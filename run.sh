@@ -12,3 +12,10 @@ echo "case D"
 ./rides d_metropolis.in > d.out
 echo "case E"
 ./rides e_high_bonus.in > e.out
+
+echo "Final score : "
+grep Score *out | cut -d' ' -f2 | paste -s -d+ | bc
+echo "Maximum theoretical score : "
+echo 52805832
+
+
