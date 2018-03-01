@@ -116,7 +116,7 @@ void naive() {
       }
     }
 
-    if (valid) {
+    if (best_valid) {
       score += r.time_to_drive + (best_bonus ? B : 0);
       Car &c = car_pool[best_car];
       solution[c.id].push_back(i);
@@ -148,6 +148,13 @@ int main(int argc, char **argv) {
     r.time_to_drive = r.start.distance_to(r.end);
     rides.push_back(r);
   }
+
+  // Score theorique maximal
+  int max_score = 0;
+  for (auto &r : rides) {
+    max_score += B + r.time_to_drive;
+  }
+  std::cerr << "Maximum theoretical score = " << max_score << std::endl;
 
   // Solution naive
   naive();
