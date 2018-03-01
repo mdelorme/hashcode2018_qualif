@@ -12,6 +12,7 @@ struct Point {
 };
 
 struct Ride {
+  int id;
   Point start;
   Point end;
   int start_t, finish_t;
@@ -38,7 +39,7 @@ void print_solution() {
 }
 
 int time_when_ride_finished(Ride &r, int time_start, Point &car_pos,
-			    bool &valid, bool &on_time) {
+			    bool &on_time) {
   int time_to_start = time_start + car_pos.distance_to(r.start);
   if (time_to_start <= r.start_t) {
     time_to_start = r.start_t;
@@ -47,13 +48,7 @@ int time_when_ride_finished(Ride &r, int time_start, Point &car_pos,
   else
     on_time = false;
 
-  int total = time_to_start + r.time_to_drive;
-  if (total < r.finish_t)
-    valid = true;
-  else
-    valid = false;
-
-  return total;
+  return time_to_start + r.time_to_drive;
 }
 
 struct Car {
@@ -98,6 +93,7 @@ void naive() {
     int  best_car   = -1;
     bool best_bonus = false;
     bool best_valid = false;
+    //std::cerr << "Ride : " << r.id << std::endl;
 
     // On verifie chaque voiture
     for (int j=0; j < F; ++j) {
@@ -105,21 +101,26 @@ void naive() {
       
       // En combien de temps on finit ?
       finish_time = time_when_ride_finished(r, c.time_available, c.pos,
-					    valid, bonus);
+					    bonus);
+
+      //std::cerr << " - Car " << c.id << " : " << finish_time
+      //		<< " " << (bonus ? "on time" : "") << std::endl;
 
       // On garde le meilleur
-      if (finish_time < best_time || (!best_bonus && bonus)) {
+      if (finish_time < best_time) {
 	best_time  = finish_time;
 	best_car   = j;
 	best_bonus = bonus;
-	best_valid = valid;
       }
     }
 
-    if (best_valid) {
-      score += r.time_to_drive + (best_bonus ? B : 0);
+    if (best_time < r.finish_t) {
+      score += r.time_to_drive;
+      if (best_bonus)
+	score += B;
+      
       Car &c = car_pool[best_car];
-      solution[c.id].push_back(i);
+      solution[c.id].push_back(r.id);
       c.time_available = best_time;
       c.pos = r.end;
     }
@@ -143,6 +144,7 @@ int main(int argc, char **argv) {
 
   for (int i=0; i < N; ++i) {
     Ride r;
+    r.id = i;
     std::cin >> r.start.row >> r.start.col >> r.end.row >> r.end.col
 	     >> r.start_t >> r.finish_t;
     r.time_to_drive = r.start.distance_to(r.end);
